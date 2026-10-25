@@ -33,7 +33,7 @@ export const AiToolsData = [
         description: 'Find the perfect, catchy title for your blog posts with our AI-powered generator.',
         Icon: Hash,
         bg: { from: '#B153EA', to: '#E549A3' },
-        path: '/ai/blog-titles'
+        path: '/ai/blog-title'
     },
     {
         title: 'AI Image Generation',

@@ -9,6 +9,7 @@ import ReviewResume from './pages/ReviewResume.jsx'
 import WriteArticle from './pages/WriteArticle.jsx'
 import GenerateImages from './pages/GenerateImages.jsx'
 import BlogTitle from './pages/BlogTitle.jsx'
+import Community from './pages/Community.jsx'
 
 const App = () => {
   return (
@@ -24,6 +25,7 @@ const App = () => {
           <Route path='write-article' element={<WriteArticle />} />
           <Route path='generate-images' element={<GenerateImages />} />
           <Route path='blog-title' element={<BlogTitle />} />
+          <Route path='community' element={<Community />} />
 
         </Route>
       </Routes>

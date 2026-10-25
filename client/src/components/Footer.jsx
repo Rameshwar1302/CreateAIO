@@ -1,43 +1,81 @@
 import React from 'react'
-import { assets } from '../assets/assets';
+import { Link } from 'react-router-dom'
+import { assets } from '../assets/assets'
+
+const companyLinks = [
+  { label: 'Home', to: '/' },
+  { label: 'About us', to: '#' },
+  { label: 'Contact us', to: '#' },
+  { label: 'Privacy policy', to: '#' },
+]
 
 const Footer = () => {
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    // TODO: connect to your newsletter service
+    e.target.reset()
+  }
+
   return (
-    <footer className="px-6 md:px-16 lg:px-24 xl:px-32 pt-8 w-full text-gray-500 mt-20">
-            <div className="flex flex-col md:flex-row justify-between w-full gap-10 border-b border-gray-500/30 pb-6">
-                <div className="md:max-w-96">
-                    <img className='h-9' src={assets.logo} alt='logo' />
-                    <p className="mt-6 text-sm">
-                        AI-powered creative workspace for writing articles, building resumes, generating images, and editing photos with background and object removal.
-                    </p>
-                </div>
-                <div className="flex-1 flex items-start md:justify-end gap-20">
-                    <div>
-                        <h2 className="font-semibold mb-5 text-gray-800">Company</h2>
-                        <ul className="text-sm space-y-2">
-                            <li><a href="#">Home</a></li>
-                            <li><a href="#">About us</a></li>
-                            <li><a href="#">Contact us</a></li>
-                            <li><a href="#">Privacy policy</a></li>
-                        </ul>
-                    </div>
-                    <div>
-                        <h2 className="font-semibold text-gray-800 mb-5">Subscribe to our newsletter</h2>
-                        <div className="text-sm space-y-2">
-                            <p>The latest news, articles, and resources, sent to your inbox weekly.</p>
-                            <div className="flex items-center gap-2 pt-4">
-                                <input className="border border-gray-500/30 placeholder-gray-500 focus:ring-2 ring-indigo-600 outline-none w-full max-w-64 h-9 rounded px-2" type="email" placeholder="Enter your email" />
-                                <button className="bg-primary w-24 h-9 text-white rounded cursor-pointer">Subscribe</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <p className="pt-4 text-center text-xs md:text-sm pb-5">
-                Copyright 2026 © Quick AI. All Right Reserved.
+    <footer className='w-full mt-20 px-6 md:px-16 lg:px-24 xl:px-32 pt-12 text-gray-500 bg-white border-t border-gray-200'>
+      <div className='flex flex-col md:flex-row justify-between gap-10 pb-10 border-b border-gray-200'>
+        {/* Brand */}
+        <div className='md:max-w-sm'>
+          <img className='h-9' src={assets.logo} alt='Quick.ai' />
+          <p className='mt-5 text-sm leading-relaxed'>
+            AI-powered creative workspace for writing articles, building resumes, generating
+            images, and editing photos with background and object removal.
+          </p>
+        </div>
+
+        {/* Links + newsletter */}
+        <div className='flex flex-col sm:flex-row gap-10 sm:gap-16 lg:gap-24'>
+          <div>
+            <h2 className='mb-4 font-semibold text-gray-800'>Company</h2>
+            <ul className='space-y-2 text-sm'>
+              {companyLinks.map(({ label, to }) => (
+                <li key={label}>
+                  <Link to={to} className='hover:text-primary transition-colors'>
+                    {label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className='sm:max-w-xs'>
+            <h2 className='mb-4 font-semibold text-gray-800'>Subscribe to our newsletter</h2>
+            <p className='text-sm'>
+              The latest news, articles, and resources, sent to your inbox weekly.
             </p>
-        </footer>
-  );
+
+            <form onSubmit={handleSubmit} className='mt-4 flex items-center gap-2'>
+              <label htmlFor='newsletter-email' className='sr-only'>
+                Email address
+              </label>
+              <input
+                id='newsletter-email'
+                type='email'
+                required
+                placeholder='Enter your email'
+                className='flex-1 min-w-0 h-10 px-3 text-sm text-gray-800 placeholder-gray-400 border border-gray-300 rounded-lg outline-none focus:border-primary focus:ring-2 focus:ring-primary/20'
+              />
+              <button
+                type='submit'
+                className='h-10 px-4 text-sm text-white rounded-lg bg-primary hover:bg-primary/90 active:scale-95 transition cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary'
+              >
+                Subscribe
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <p className='py-5 text-center text-xs md:text-sm'>
+        Copyright {new Date().getFullYear()} © Quick.ai. All rights reserved.
+      </p>
+    </footer>
+  )
 }
 
 export default Footer
