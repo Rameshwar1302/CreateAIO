@@ -1,18 +1,39 @@
 import sql from "../config/db.js";
 
 
-export const getUserCreations = async (req, res)=>{
+export const getUserCreations = async (req, res) => {
     try {
-        const {userId} = req.auth();
+        // Your auth middleware sets req.userId
+        const userId = req.userId;
 
-        const creations = await sql `SELECT * FROM creations WHERE user_id = ${userId} ORDERED BY created_at DESC`
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                message: "Unauthorized"
+            });
+        }
 
-        return res.json({success : true, creations});
+        const creations = await sql`
+            SELECT *
+            FROM creations
+            WHERE user_id = ${userId}
+            ORDER BY created_at DESC
+        `;
+
+        return res.status(200).json({
+            success: true,
+            creations
+        });
 
     } catch (error) {
-        return res.json({success : false, message:error.message});
+        console.error("Get user creations failed:", error.message);
+
+        return res.status(500).json({
+            success: false,
+            message: "Failed to fetch your creations."
+        });
     }
-}
+};
 
 export const getPublishedCreations = async (req, res)=>{
     try {
