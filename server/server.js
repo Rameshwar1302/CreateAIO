@@ -9,7 +9,7 @@ import userRouter from './routes/userRoutes.js';
 const app = express();
 
 app.use(cors({
-    origin: [process.env.FRONTEND_URL],
+    origin: ['https://create-aio-psgu.vercel.app', process.env.FRONTEND_URL],
     methods: [
         'GET',
         'HEAD',
