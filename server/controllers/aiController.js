@@ -24,15 +24,18 @@ export const generateArticle = async (req, res) => {
         }
 
         const response = await AI.chat.completions.create({
-            model: "gemini-3.8-flash",
+            model: "gemini-3.5-flash-lite",
             messages: [
                 {
                     role: "user",
-                    content: prompt,
+                    content: `${prompt}
+                    Write a complete, well-structured article with an introduction,
+appropriate headings, detailed explanations, and a conclusion.
+Complete all sections and do not stop mid-sentence.`,
                 },
             ],
             temperature: 0.7,
-            max_tokens: Number(length) 
+            max_tokens: Math.ceil(Number(length) * 1.5)
         });
 
         
@@ -54,58 +57,84 @@ export const generateArticle = async (req, res) => {
 
         
         return res.json({ success: true, content });
-    } catch (error) {
-        return res.json({ success: false, message: error.message });
-    }
+    }catch (error) {
+    console.error("Generate article failed:", {
+        message: error.message,
+        name: error.name,
+        status: error.status,
+        code: error.code
+    });
+
+    return res.status(500).json({
+        success: false,
+        message: error.message
+    });
+}
 }
 
 export const generateBlogTitle = async (req, res) => {
     try {
-        
         const userId = req.userId;
         const { prompt } = req.body;
         const plan = req.plan;
         const free_usage = req.free_usage;
 
+        if (!prompt || typeof prompt !== 'string' || !prompt.trim()) {
+            return res.status(400).json({
+                success: false,
+                message: "Please enter a keyword."
+            });
+        }
+
         if (plan !== 'premium' && free_usage >= 20) {
-            return res.json({ success: false, message: "Limit reached. Upgrade to continue." });
+            return res.status(403).json({
+                success: false,
+                message: "Limit reached. Upgrade to continue."
+            });
         }
 
         const response = await AI.chat.completions.create({
-            model: "gemini-3.8-flash",
+            model: "gemini-3.5-flash-lite",
             messages: [
                 {
                     role: "user",
-                    content: prompt,
-                },
+                    content: prompt
+                }
             ],
-            temperature: 0.7,
-            max_tokens: 800
+            temperature: 0.8,
+            max_tokens: 600
         });
 
-        
         const content = response.choices[0].message.content;
 
-    
-        // Run DB save and Clerk metadata update concurrently
-    await Promise.all([
-    sql`INSERT INTO creations (user_id, prompt, content, type)
-        VALUES (${userId}, ${prompt}, ${content}, 'blog-title')`,
-    plan !== 'premium'
-        ? clerkClient.users.updateUserMetadata(userId, {
-            privateMetadata: {
-                free_usage: free_usage + 1
-            }
-        })
-        : Promise.resolve()
-]);
+        await Promise.all([
+            sql`
+                INSERT INTO creations (user_id, prompt, content, type)
+                VALUES (${userId}, ${prompt}, ${content}, 'blog-title')
+            `,
+            plan !== 'premium'
+                ? clerkClient.users.updateUserMetadata(userId, {
+                    privateMetadata: {
+                        free_usage: free_usage + 1
+                    }
+                })
+                : Promise.resolve()
+        ]);
 
-        
-        return res.json({ success: true, content });
+        return res.json({
+            success: true,
+            content
+        });
+
     } catch (error) {
-        return res.json({ success: false, message: error.message });
+        console.error("Generate blog titles failed:", error.message);
+
+        return res.status(500).json({
+            success: false,
+            message: "Failed to generate blog titles. Please try again."
+        });
     }
-}
+};
 
 export const generateImage = async (req, res) => {
     try {

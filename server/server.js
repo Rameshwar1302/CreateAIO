@@ -8,11 +8,11 @@ import userRouter from './routes/userRoutes.js';
 
 const app = express();
 
+app.use(clerkMiddleware())
 app.use(cors());
 await connectCloudinary();
 
 app.use(express.json());
-app.use(clerkMiddleware())
 const PORT = process.env.PORT || 3000;
 
 app.get('/',(req,res)=>{
