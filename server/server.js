@@ -4,6 +4,7 @@ import 'dotenv/config'
 import { clerkMiddleware, getAuth } from '@clerk/express'
 import aiRouter from './routes/aiRoutes.js';
 import connectCloudinary from './config/cloudinary.js';
+import userRouter from './routes/userRoutes.js';
 
 const app = express();
 
@@ -18,21 +19,8 @@ app.get('/',(req,res)=>{
     res.send("Server is live");
 })
 
-// app.use((req, res, next) => {
-//     try{
-//   const { userId } = getAuth(req)
-//   if (!userId) {
-//     return res.status(401).json({ error: 'Unauthorized' })
-//   }
-//   next()
-// }
-// catch (error){
-//      return res.status(501).json({ error: 'Clerk/server error' });
-// }
-// });
-
 app.use('/api/ai', aiRouter)
-
+app.use('/api/user',userRouter);
 
 app.listen(PORT, ()=>{
     console.log(`Server is listining on port ${PORT}`);

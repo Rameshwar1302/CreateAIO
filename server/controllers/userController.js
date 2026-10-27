@@ -1,7 +1,7 @@
 import sql from "../config/db.js";
 
 
-const getUserCreations = async (req, res)=>{
+export const getUserCreations = async (req, res)=>{
     try {
         const {userId} = req.auth();
 
@@ -14,7 +14,7 @@ const getUserCreations = async (req, res)=>{
     }
 }
 
-const getPublishedCreations = async (req, res)=>{
+export const getPublishedCreations = async (req, res)=>{
     try {
 
         const creations = await sql `SELECT * FROM creations WHERE publish = true ORDERED BY created_at DESC`
@@ -72,3 +72,4 @@ export const toggleLikeCreation = async (req, res) => {
         res.json({ success: false, message: error.message });
     }
 }; 
+

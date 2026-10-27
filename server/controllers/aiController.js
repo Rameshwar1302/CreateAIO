@@ -4,7 +4,7 @@ import { clerkClient } from "@clerk/express";
 import axios from "axios";
 import {v2 as cloudinary} from 'cloudinary';
 import fs from 'fs';
-import pdf from 'pdf-parse/lib/pdf-parse.js';
+import { PDFParse } from 'pdf-parse';
 
 const AI = new OpenAI({
     apiKey: process.env.GEMINI_API_KEY,
@@ -220,17 +220,27 @@ export const resumeReview = async (req, res) => {
         if (plan !== 'premium') {
             return res.json({ success: false, message: "Only Premium Users can use this feature" });
         }
+        if (!resume) {
+          return res.json({
+             success: false,
+              message: "Please upload a resume PDF"
+           });
+          }
 
-        if(resume.length > 5 * 1024 * 1024){
+        if(resume.size > 5 * 1024 * 1024){
             return res.json({ success: false, message: 'Resume size is exceeding allowed size (5MB)' });
         }
 
         const databuffer = fs.readFileSync(resume.path);    
 
         //parse the pdf to text using pdf-parse
-        const pdf = await import('pdf-parse');
-        const data = await pdf(databuffer);
-        const text = data.text;
+       
+
+        const parser = new PDFParse({ data: databuffer });
+        const result = await parser.getText();
+        const text = result.text;
+        
+        await parser.destroy();
 
         const prompt = `You are a professional resume reviewer. Please review the following resume and provide feedback on its strengths, weaknesses, and suggestions for improvement. Resume content:\n\n ${text}`;
 
