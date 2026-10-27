@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Route, Routes } from 'react-router-dom'
 import Home from './pages/Home.jsx'
 import Layout from './pages/Layout.jsx'
@@ -10,8 +10,14 @@ import WriteArticle from './pages/WriteArticle.jsx'
 import GenerateImages from './pages/GenerateImages.jsx'
 import BlogTitle from './pages/BlogTitle.jsx'
 import Community from './pages/Community.jsx'
+import { useAuth } from '@clerk/react'
 
 const App = () => {
+  const {getToken} = useAuth();
+  useEffect(()=>{
+    getToken().then((token)=>console.log(token)
+    )
+  })
   return (
     <div>
       <Routes>

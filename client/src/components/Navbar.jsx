@@ -10,7 +10,7 @@ const Navbar = () => {
   const { openSignIn } = useClerk()
 
   return (
-    <header className='fixed top-0 inset-x-0 z-50 bg-white/70 backdrop-blur-xl border-b border-gray-200/60'>
+    <header className='fixed top-0 inset-x-0 z-50 bg-white/70 backdrop-blur-lg border-b border-gray-200/60'>
       <div className='flex justify-between items-center py-3 px-4 sm:px-20 xl:px-32'>
         <img
           src={assets.logo}
@@ -25,7 +25,7 @@ const Navbar = () => {
               to='/ai'
               className='hidden sm:inline text-sm text-slate-600 hover:text-slate-900 transition-colors'
             >
-              Dashboard
+              <span className='hidden lg:inline'>Dashboard</span>
             </Link>
             <UserButton />
           </div>
