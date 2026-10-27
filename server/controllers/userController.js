@@ -35,62 +35,111 @@ export const getUserCreations = async (req, res) => {
     }
 };
 
-export const getPublishedCreations = async (req, res)=>{
+export const getPublishedCreations = async (req, res) => {
     try {
+        const creations = await sql`
+            SELECT
+                id,
+                user_id,
+                prompt,
+                content,
+                type,
+                publish,
+                likes,
+                created_at
+            FROM creations
+            WHERE publish = TRUE
+              AND type = 'image'
+            ORDER BY created_at DESC
+        `;
 
-        const creations = await sql `SELECT * FROM creations WHERE publish = true ORDERED BY created_at DESC`
-
-        return res.json({success : true, creations});
+        return res.status(200).json({
+            success: true,
+            creations
+        });
 
     } catch (error) {
-        return res.json({success : false, message:error.message});
+        console.error(
+            "Get published creations failed:",
+            error.message
+        );
+
+        return res.status(500).json({
+            success: false,
+            message: "Failed to fetch public creations."
+        });
     }
-}
+};
 
 
 export const toggleLikeCreation = async (req, res) => {
     try {
-        const { userId } = req.auth();
+        const userId = req.userId;
         const { id } = req.body;
 
-        const [creation] = await sql`
-            SELECT * FROM creations WHERE id = ${id}
-        `;
-
-        if (!creation) {
-            return res.json({
+        if (!userId) {
+            return res.status(401).json({
                 success: false,
-                message: "Creation not found"
+                message: "Unauthorized."
             });
         }
 
-        const currentLikes = creation.likes;
-        const userIdStr = userId.toString();
-
-        let updatedLikes;
-        let message;
-
-        if (currentLikes.includes(userIdStr)) {
-            updatedLikes = currentLikes.filter(
-                (user) => user !== userIdStr
-            );
-            message = 'Creation Unliked';
-        } else {
-            updatedLikes = [...currentLikes, userIdStr];
-            message = 'Creation Liked';
+        if (id === undefined || id === null || id === '') {
+            return res.status(400).json({
+                success: false,
+                message: "Creation ID is required."
+            });
         }
 
-        const formattedArray = `{${updatedLikes.join(',')}}`;
-
-        await sql`
+        // Toggle the like atomically to avoid overwriting
+        // another user's concurrent update.
+        const [updated] = await sql`
             UPDATE creations
-            SET likes = ${formattedArray}::text[]
+            SET likes = CASE
+                WHEN ${userId} = ANY(
+                    COALESCE(likes, ARRAY[]::text[])
+                )
+                THEN array_remove(
+                    COALESCE(likes, ARRAY[]::text[]),
+                    ${userId}
+                )
+                ELSE array_append(
+                    COALESCE(likes, ARRAY[]::text[]),
+                    ${userId}
+                )
+            END
             WHERE id = ${id}
+              AND publish = TRUE
+              AND type = 'image'
+            RETURNING likes
         `;
 
-        res.json({ success: true, message });
+        if (!updated) {
+            return res.status(404).json({
+                success: false,
+                message: "Public image not found."
+            });
+        }
+
+        const likes = updated.likes || [];
+        const liked = likes.includes(userId);
+
+        return res.status(200).json({
+            success: true,
+            liked,
+            likes,
+            message: liked
+                ? "Creation liked."
+                : "Creation unliked."
+        });
+
     } catch (error) {
-        res.json({ success: false, message: error.message });
+        console.error("Toggle like failed:", error.message);
+
+        return res.status(500).json({
+            success: false,
+            message: "Failed to update like."
+        });
     }
-}; 
+};
 
