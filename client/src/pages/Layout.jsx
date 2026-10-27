@@ -3,7 +3,7 @@ import { Outlet, useNavigate } from 'react-router-dom'
 import { Menu, X } from 'lucide-react'
 import { SignIn, useUser } from '@clerk/react'
 import { assets } from '../assets/assets'
-import Sidebar from '../components/SideBar.jsx'
+import Sidebar from '../components/Sidebar.jsx'
 
 const Layout = () => {
   const navigate = useNavigate()
